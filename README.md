@@ -43,3 +43,11 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 ### Make similar edits to docker-compose.yaml
 in the POSTGRES_USER and POSTGRES_PASSWORD fields, but the same username and password you used for the application.properties file.
 Please ensure the 5321 port on your machine is open as the container listenes on this port to connect to the PostgreSQL DB.
+
+### Connecting to your DB from command line
+navigate to the root of the project from the command line and type: docker exec -it postgres-library-management psql -U <yourUsernameHere>
+.
+You should not be prompted for a password but if you are, input the password you used in application.properties
+
+From here use \l to list all DB's and: \c libmanagedb
+to connect to the DB for this project. From here all your standard SQL commands will work.
