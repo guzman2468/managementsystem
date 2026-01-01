@@ -3,12 +3,16 @@ package com.library.managementsystem.controller;
 
 import com.library.managementsystem.model.MessageReponse;
 import com.library.managementsystem.model.book.Book;
+import com.library.managementsystem.model.book.BookResponse;
+import com.library.managementsystem.model.book.BookTitleRequest;
 import com.library.managementsystem.service.BookService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/books")
@@ -24,6 +28,25 @@ public class BookController {
     @GetMapping
     public List<Book> getAllBooks() {
          return bookService.getAllBooks();
+    }
+
+    @GetMapping("/getBookByTitle")
+    public  BookResponse getBookByTitle(@Valid @RequestBody BookTitleRequest request) {
+        BookResponse response = new BookResponse();
+
+        String title = request.getTitle().toLowerCase();
+        Optional<Book> bookSearched = bookService.findByTitle(title.toLowerCase());
+
+        if (bookSearched.isPresent()) {
+            Book bookToBeSentAsResponse = bookSearched.get();
+            response.setTitle(bookToBeSentAsResponse.getTitle());
+            response.setAuthor(bookToBeSentAsResponse.getAuthor());
+            response.setIsbn(bookToBeSentAsResponse.getIsbn());
+            response.setAvailableCopies(bookToBeSentAsResponse.getAvailableCopies());
+        } else {
+            response.setMessage("No Book with that title was found");
+        }
+        return response;
     }
 
     @PostMapping("/createBook")

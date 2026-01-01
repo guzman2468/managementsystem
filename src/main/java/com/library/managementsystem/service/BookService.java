@@ -4,7 +4,9 @@ import com.library.managementsystem.model.book.Book;
 import com.library.managementsystem.repository.BookRepository;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BookService {
@@ -28,4 +30,8 @@ public class BookService {
         return bookRepository.existsByIsbn(isbn);
     }
 
+
+    public Optional<Book> findByTitle(String title) {
+        return bookRepository.findByTitle(title);
+    }
 }
