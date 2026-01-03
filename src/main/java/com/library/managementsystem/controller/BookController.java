@@ -31,7 +31,7 @@ public class BookController {
     }
 
     @GetMapping("/getBookByTitle")
-    public  BookResponse getBookByTitle(@Valid @RequestBody BookTitleRequest request) {
+    public ResponseEntity<BookResponse> getBookByTitle(@Valid @RequestBody BookTitleRequest request) {
         BookResponse response = new BookResponse();
 
         String title = request.getTitle().toLowerCase();
@@ -43,10 +43,11 @@ public class BookController {
             response.setAuthor(bookToBeSentAsResponse.getAuthor());
             response.setIsbn(bookToBeSentAsResponse.getIsbn());
             response.setAvailableCopies(bookToBeSentAsResponse.getAvailableCopies());
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         } else {
             response.setMessage("No Book with that title was found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
-        return response;
     }
 
     @PostMapping("/createBook")
