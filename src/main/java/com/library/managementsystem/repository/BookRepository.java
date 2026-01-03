@@ -14,4 +14,7 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     // Query to search for values case INSENSITVE
     @Query(value = "SELECT * FROM book WHERE LOWER(title) = LOWER(:title)", nativeQuery = true)
     Optional<Book> findByTitle(@Param("title") String title);
+
+    @Query(value = "SELECT * FROM book WHERE isbn = :isbn", nativeQuery = true)
+    Optional<Book> findByIsbn(@Param("isbn") String isbn);
 }

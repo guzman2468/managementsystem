@@ -3,6 +3,7 @@ package com.library.managementsystem.controller;
 
 import com.library.managementsystem.model.MessageReponse;
 import com.library.managementsystem.model.book.Book;
+import com.library.managementsystem.model.book.BookIsbnRequest;
 import com.library.managementsystem.model.book.BookResponse;
 import com.library.managementsystem.model.book.BookTitleRequest;
 import com.library.managementsystem.service.BookService;
@@ -50,6 +51,26 @@ public class BookController {
         }
     }
 
+    @GetMapping("/getBookByIsbn")
+    public ResponseEntity<BookResponse> getBookByIsbn(@Valid @RequestBody BookIsbnRequest request) {
+        BookResponse response = new BookResponse();
+
+        String isbn = request.getIsbn();
+        Optional<Book> bookSearched = bookService.findByIsbn(isbn);
+
+        if (bookSearched.isPresent()) {
+            Book bookToBeSentAsResponse = bookSearched.get();
+            response.setTitle(bookToBeSentAsResponse.getTitle());
+            response.setAuthor(bookToBeSentAsResponse.getAuthor());
+            response.setIsbn(bookToBeSentAsResponse.getIsbn());
+            response.setAvailableCopies(bookToBeSentAsResponse.getAvailableCopies());
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } else {
+            response.setMessage("No Book with that ISBN was found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
     @PostMapping("/createBook")
     public ResponseEntity<MessageReponse> addNewBook(@RequestBody Book book) {
 
@@ -67,6 +88,5 @@ public class BookController {
             response.setMessage("Book added successfully");
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }
-        //need a way to set the status code in postman to be an error not a 200
     }
 }

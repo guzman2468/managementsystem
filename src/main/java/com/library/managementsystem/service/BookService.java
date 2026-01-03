@@ -34,4 +34,8 @@ public class BookService {
     public Optional<Book> findByTitle(String title) {
         return bookRepository.findByTitle(title);
     }
+
+    public Optional<Book> findByIsbn(String isbn) {
+        return bookRepository.findByIsbn(isbn);
+    }
 }
