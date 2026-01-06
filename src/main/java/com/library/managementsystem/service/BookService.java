@@ -38,4 +38,8 @@ public class BookService {
     public Optional<Book> findByIsbn(String isbn) {
         return bookRepository.findByIsbn(isbn);
     }
+
+    public List<Book> getBooksByAuthor(String author) {
+        return bookRepository.findBooksByAuthor(author);
+    }
 }

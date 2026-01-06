@@ -2,18 +2,17 @@ package com.library.managementsystem.controller;
 
 
 import com.library.managementsystem.model.MessageReponse;
-import com.library.managementsystem.model.book.Book;
-import com.library.managementsystem.model.book.BookIsbnRequest;
-import com.library.managementsystem.model.book.BookResponse;
-import com.library.managementsystem.model.book.BookTitleRequest;
+import com.library.managementsystem.model.book.*;
 import com.library.managementsystem.service.BookService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/books")
@@ -68,6 +67,31 @@ public class BookController {
         } else {
             response.setMessage("No Book with that ISBN was found");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
+    @GetMapping("/getBooksByAuthor")
+    public ResponseEntity<List<BookResponse>> getBooksByAuthor(@Valid @RequestBody BookAuthorRequest request) {
+        String author = request.getAuthor();
+        List<Book> bookSearched = bookService.getBooksByAuthor(author.toLowerCase());
+
+        if (!bookSearched.isEmpty()) {
+            // convert List<Book> to List<BookResponse>
+            List<BookResponse> responseList = bookSearched.stream()
+                    .map(book -> {
+                        BookResponse response = new BookResponse();
+                        response.setTitle(book.getTitle());
+                        response.setAuthor(book.getAuthor());
+                        response.setIsbn(book.getIsbn());
+                        response.setAvailableCopies(book.getAvailableCopies());
+                        return response;
+                    })
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.status(HttpStatus.OK).body(responseList);
+        } else {
+            // return empty list with NOT_FOUND status for consistency
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
         }
     }
 
