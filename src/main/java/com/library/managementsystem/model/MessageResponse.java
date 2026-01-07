@@ -1,14 +1,14 @@
 package com.library.managementsystem.model;
 
-public class MessageReponse {
+public class MessageResponse {
 
     private String message;
 
-    public MessageReponse(String message) {
+    public MessageResponse(String message) {
         this.message = message;
     }
 
-    public MessageReponse() {
+    public MessageResponse() {
     }
 
     public String getMessage() {

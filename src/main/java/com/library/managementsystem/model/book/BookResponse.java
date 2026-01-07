@@ -2,15 +2,14 @@ package com.library.managementsystem.model.book;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.library.managementsystem.model.MessageReponse;
-import lombok.AllArgsConstructor;
+import com.library.managementsystem.model.MessageResponse;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class BookResponse extends MessageReponse {
+public class BookResponse extends MessageResponse {
 
     private Integer id;
     private String author;

@@ -2,7 +2,7 @@ package com.library.managementsystem.model.user;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.library.managementsystem.model.MessageReponse;
+import com.library.managementsystem.model.MessageResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserResponse extends MessageReponse {
+public class UserResponse extends MessageResponse {
 
     private Integer id;
     private String name;

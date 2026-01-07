@@ -1,7 +1,7 @@
 package com.library.managementsystem.controller;
 
 import com.library.managementsystem.model.user.User;
-import com.library.managementsystem.model.MessageReponse;
+import com.library.managementsystem.model.MessageResponse;
 import com.library.managementsystem.model.user.UserResponse;
 import com.library.managementsystem.model.user.UserRole;
 import com.library.managementsystem.service.UserService;
@@ -28,9 +28,9 @@ public class UserController {
     }
 
     @PostMapping("/createUser")
-    public ResponseEntity<MessageReponse> createUser(@Valid @RequestBody User user) {
+    public ResponseEntity<MessageResponse> createUser(@Valid @RequestBody User user) {
 
-        MessageReponse response = new MessageReponse();
+        MessageResponse response = new MessageResponse();
         String name = user.getName();
         String email = user.getEmail();
         UserRole role = user.getRole();

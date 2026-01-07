@@ -1,7 +1,7 @@
 package com.library.managementsystem.controller;
 
 
-import com.library.managementsystem.model.MessageReponse;
+import com.library.managementsystem.model.MessageResponse;
 import com.library.managementsystem.model.book.*;
 import com.library.managementsystem.service.BookService;
 import jakarta.validation.Valid;
@@ -23,7 +23,6 @@ public class BookController {
     public BookController(BookService bookService) {
         this.bookService = bookService;
     }
-
 
     @GetMapping
     public List<Book> getAllBooks() {
@@ -96,9 +95,9 @@ public class BookController {
     }
 
     @PostMapping("/createBook")
-    public ResponseEntity<MessageReponse> addNewBook(@RequestBody Book book) {
+    public ResponseEntity<MessageResponse> addNewBook(@RequestBody Book book) {
 
-        MessageReponse response = new MessageReponse();
+        MessageResponse response = new MessageResponse();
 
         //implement error handling later on
 
@@ -112,5 +111,47 @@ public class BookController {
             response.setMessage("Book added successfully");
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }
+    }
+
+    @PutMapping("/checkoutBookByTitle")
+    public ResponseEntity<MessageResponse> checkoutBookByTitle(@Valid @RequestBody BookTitleRequest request) {
+        String title = request.getTitle().toLowerCase();
+        Optional<Book> bookSearched = bookService.findByTitle(title);
+
+        if (!bookSearched.isPresent()) {
+            MessageResponse response = new MessageResponse();
+            response.setMessage("No Book with that title was found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        Book book = bookSearched.get();
+
+        // Parse the availableCopies from varchar to integer
+        int availableCopies;
+        try {
+            availableCopies = Integer.parseInt(book.getAvailableCopies());
+        } catch (NumberFormatException e) {
+            MessageResponse response = new MessageResponse();
+            response.setMessage("Invalid available copies format");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+
+        // Check if copies are available
+        if (availableCopies <= 0) {
+            MessageResponse response = new MessageResponse();
+            response.setMessage("No copies available for checkout");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        // Decrement available copies
+        availableCopies--;
+        book.setAvailableCopies(String.valueOf(availableCopies));
+
+        // Save the updated book
+        bookService.updateBook(book);
+
+        MessageResponse response = new MessageResponse();
+        response.setMessage("Book checked out successfully. Remaining copies: " + availableCopies);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

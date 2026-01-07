@@ -42,4 +42,8 @@ public class BookService {
     public List<Book> getBooksByAuthor(String author) {
         return bookRepository.findBooksByAuthor(author);
     }
+
+    public void updateBook(Book book) {
+        bookRepository.save(book);
+    }
 }
