@@ -131,6 +131,7 @@ public class BookController {
         try {
             availableCopies = Integer.parseInt(book.getAvailableCopies());
         } catch (NumberFormatException e) {
+            // case where LIBRARIAN user may have inserted alphabetical data when the DB expects numerical values for availableCopies
             MessageResponse response = new MessageResponse();
             response.setMessage("Invalid available copies format");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -151,7 +152,50 @@ public class BookController {
         bookService.updateBook(book);
 
         MessageResponse response = new MessageResponse();
-        response.setMessage("Book checked out successfully. Remaining copies: " + availableCopies);
+        response.setMessage(book.getTitle() + " has been checked out successfully. Remaining copies: " + availableCopies);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PutMapping("/checkoutBookByIsbn")
+    public ResponseEntity<MessageResponse> checkoutBookByIsbn(@Valid @RequestBody BookIsbnRequest request) {
+        String isbn = request.getIsbn();
+        Optional<Book> bookSearched = bookService.findByIsbn(isbn);
+
+        if (!bookSearched.isPresent()) {
+            MessageResponse response = new MessageResponse();
+            response.setMessage("No Book with that ISBN was found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        Book book = bookSearched.get();
+
+        // Parse the availableCopies from varchar to integer
+        int availableCopies;
+        try {
+            availableCopies = Integer.parseInt(book.getAvailableCopies());
+        } catch (NumberFormatException e) {
+            // case where LIBRARIAN user may have inserted alphabetical data when the DB expects numerical values for availableCopies
+            MessageResponse response = new MessageResponse();
+            response.setMessage("Invalid available copies format");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+
+        // Check if copies are available
+        if (availableCopies <= 0) {
+            MessageResponse response = new MessageResponse();
+            response.setMessage("No copies available for checkout");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        // Decrement available copies
+        availableCopies--;
+        book.setAvailableCopies(String.valueOf(availableCopies));
+
+        // Save the updated book
+        bookService.updateBook(book);
+
+        MessageResponse response = new MessageResponse();
+        response.setMessage(book.getTitle() + " has been checked out successfully. Remaining copies: " + availableCopies);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
