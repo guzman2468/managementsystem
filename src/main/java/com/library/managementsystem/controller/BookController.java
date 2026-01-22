@@ -126,7 +126,6 @@ public class BookController {
 
         Book book = bookSearched.get();
 
-        // Parse the availableCopies from varchar to integer
         int availableCopies;
         try {
             availableCopies = Integer.parseInt(book.getAvailableCopies());
@@ -137,18 +136,15 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
 
-        // Check if copies are available
         if (availableCopies <= 0) {
             MessageResponse response = new MessageResponse();
             response.setMessage("No copies available for checkout");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
-        // Decrement available copies
         availableCopies--;
         book.setAvailableCopies(String.valueOf(availableCopies));
 
-        // Save the updated book
         bookService.updateBook(book);
 
         MessageResponse response = new MessageResponse();
@@ -169,7 +165,7 @@ public class BookController {
 
         Book book = bookSearched.get();
 
-        // Parse the availableCopies from varchar to integer
+        //
         int availableCopies;
         try {
             availableCopies = Integer.parseInt(book.getAvailableCopies());
@@ -180,18 +176,15 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
 
-        // Check if copies are available
         if (availableCopies <= 0) {
             MessageResponse response = new MessageResponse();
             response.setMessage("No copies available for checkout");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
-        // Decrement available copies
         availableCopies--;
         book.setAvailableCopies(String.valueOf(availableCopies));
 
-        // Save the updated book
         bookService.updateBook(book);
 
         MessageResponse response = new MessageResponse();
