@@ -58,7 +58,7 @@ public class UserController {
         User matchedUser = userService.findByNameAndEmail(name, email);
 
         if (matchedUser != null) {
-            response.setId(matchedUser.getId());
+//            response.setId(matchedUser.getId());
             response.setName(matchedUser.getName());
             response.setEmail(matchedUser.getEmail());
             response.setRole(String.valueOf(matchedUser.getRole()));
