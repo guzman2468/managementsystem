@@ -177,7 +177,6 @@ public class BookController {
 
         Book book = bookSearched.get();
 
-        //
         int availableCopies;
         try {
             availableCopies = Integer.parseInt(book.getAvailableCopies());
@@ -202,5 +201,44 @@ public class BookController {
         MessageResponse response = new MessageResponse();
         response.setMessage(book.getTitle() + " has been checked out successfully. Remaining copies: " + availableCopies);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/deleteBook")
+    public ResponseEntity<MessageResponse> deleteBook(@Valid @RequestBody Book request) {
+        MessageResponse response = new MessageResponse();
+
+        String validIsbn = request.getIsbn();
+        String validTitle = request.getTitle();
+        String validAuthor = request.getAuthor();
+
+        // ensure all fields present AND constraints are met for each type of input
+
+        if (validIsbn.length() != 13) {
+            response.setMessage("ISBN inputted does not follow the 13 digit no dash input required of the field.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } else if (!validIsbn.matches("\\d+")) {
+            response.setMessage("ISBN must be ONLY numerical values please try again.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        // check if book exists with all three matching criteria
+        Optional<Book> bookToDelete = bookService.findByTitleAndAuthorAndIsbn(
+                validTitle.toLowerCase(),
+                validAuthor.toLowerCase(),
+                validIsbn
+        );
+
+        if (!bookToDelete.isPresent()) {
+            response.setMessage("No book found matching the provided title, author, and ISBN");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } else {
+            bookService.deleteByTitleAndAuthorAndIsbn(
+                    validTitle.toLowerCase(),
+                    validAuthor.toLowerCase(),
+                    validIsbn
+            );
+            response.setMessage("Book deleted successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }
     }
 }

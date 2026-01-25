@@ -46,4 +46,12 @@ public class BookService {
     public void updateBook(Book book) {
         bookRepository.save(book);
     }
+
+    public Optional<Book> findByTitleAndAuthorAndIsbn(String title, String author, String isbn) {
+        return bookRepository.findByTitleAndAuthorAndIsbn(title, author, isbn);
+    }
+
+    public void deleteByTitleAndAuthorAndIsbn(String title, String author, String isbn) {
+        bookRepository.deleteByTitleAndAuthorAndIsbn(title, author, isbn);
+    }
 }
