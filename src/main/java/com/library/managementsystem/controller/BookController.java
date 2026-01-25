@@ -101,11 +101,15 @@ public class BookController {
 
         // validate ISBN fits length and numeric constraints
         String validIsbn = book.getIsbn();
+        String validAvailableCopies = book.getAvailableCopies();
         if (validIsbn.length() != 13) {
             response.setMessage("ISBN inputted does not follow the 13 digit no dash input required of the field.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } else if (!validIsbn.matches("\\d+")) {
             response.setMessage("ISBN must be ONLY numerical values please try again.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } else if (!validAvailableCopies.matches("\\d+")) {
+            response.setMessage("AvailableCopies must be a numerical value.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
