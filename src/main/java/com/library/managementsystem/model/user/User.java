@@ -1,6 +1,7 @@
 package com.library.managementsystem.model.user;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -26,9 +27,11 @@ public class User {
     @Column(unique = true, name = "email")
     private String email;
 
-//    @NotBlank(message = "password must not be null or blank")
-//    @Column(name = "password_hash")
-//    private String passwordHash;
+
+    @Column(name = "password_hash", nullable = false)
+    @JsonIgnore
+    private String passwordHash;
+
     //@NotBlank(message = "role must not be null or blank")
     @Column(name = "role")
     @Enumerated(EnumType.STRING)

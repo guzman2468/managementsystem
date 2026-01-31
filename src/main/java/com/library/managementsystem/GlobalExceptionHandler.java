@@ -2,6 +2,7 @@ package com.library.managementsystem;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,13 +12,10 @@ import com.library.managementsystem.model.MessageResponse;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<MessageResponse> handleValidationException(MethodArgumentNotValidException ex) {
-        // Grab the first field error
-        FieldError fieldError = ex.getBindingResult().getFieldError();
-        String errorMessage = (fieldError != null) ? fieldError.getDefaultMessage() : "Validation error";
-
-        // Wrap it in your custom response
-        return new ResponseEntity<>(new MessageResponse(errorMessage), HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<MessageResponse> handleInvalidEnum() {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new MessageResponse("Invalid value detected. Please verify your inputs match what is expected for each field."));
     }
 }

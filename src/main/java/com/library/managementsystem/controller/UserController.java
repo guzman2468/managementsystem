@@ -1,93 +1,90 @@
 package com.library.managementsystem.controller;
 
-import com.library.managementsystem.model.user.User;
 import com.library.managementsystem.model.MessageResponse;
-import com.library.managementsystem.model.user.UserResponse;
+import com.library.managementsystem.model.user.CreateUserRequest;
+import com.library.managementsystem.model.user.NameEmailRequest;
+import com.library.managementsystem.model.user.User;
 import com.library.managementsystem.model.user.UserRole;
 import com.library.managementsystem.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
 
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
-    }
-
-    @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/createUser")
-    public ResponseEntity<MessageResponse> createUser(@Valid @RequestBody User user) {
+    public ResponseEntity<MessageResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
 
         MessageResponse response = new MessageResponse();
-        String name = user.getName();
-        String email = user.getEmail();
-        UserRole role = user.getRole();
 
-        boolean isPresentByEmail = userService.checkDupeUserByEmail(email);
+        if (userService.checkDupeUserByEmail(request.email())) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Email already designated to another user. Please try another email."));
+        }
 
-        if (isPresentByEmail) {
-            response.setMessage("Email already desginated to another user. Please try another email.");
+        User user = new User();
+        user.setName(request.name());
+        user.setEmail(request.email());
+        if (request.role() != UserRole.LIBRARIAN && request.role() != UserRole.MEMBER) {
+            response.setMessage("Invalid role detected.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-        } else {
-            userService.createUser(new User(name, email, role));
-            response.setMessage("User added successfully.");
-            return ResponseEntity.status(HttpStatus.OK).body(response);
         }
+        user.setRole(request.role());
 
+        user.setPasswordHash(passwordEncoder.encode(request.password()));
+
+        userService.createUser(user);
+
+        response.setMessage("User added successfully.");
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
-    @GetMapping("/getByNameAndEmail")
-    public UserResponse getByNameAndEmail(@Valid @RequestBody User user) {
+    // moved to just confirmation opposed to display info
+    @PostMapping("/getByNameAndEmail")
+    public ResponseEntity<MessageResponse> getByNameAndEmail(@Valid @RequestBody NameEmailRequest request) {
 
-        UserResponse response = new UserResponse();
-        String name = user.getName();
-        String email = user.getEmail();
+        User matchedUser = userService.findByNameAndEmail(request.name(), request.email());
 
-        User matchedUser = userService.findByNameAndEmail(name, email);
-
-        if (matchedUser != null) {
-//            response.setId(matchedUser.getId());
-            response.setName(matchedUser.getName());
-            response.setEmail(matchedUser.getEmail());
-            response.setRole(String.valueOf(matchedUser.getRole()));
-        } else {
-            response.setMessage("User with that name and email not found");
-        }
-        return response;
-    }
-
-
-    @DeleteMapping
-    public UserResponse deleteUser(@Valid @RequestBody User user) {
-
-        UserResponse response = new UserResponse();
-        String name = user.getName();
-        String email =  user.getEmail();
-
-        User matchedUser = userService.findByNameAndEmail(name, email);
-
-        if (matchedUser != null) {
-            userService.deleteUser(matchedUser);
-            response.setMessage("User successfully deleted");
-        } else {
-            response.setMessage("No user found with those details.");
+        if (matchedUser == null) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("User with that name and email not found"));
         }
 
-        return response;
+        // to confirm successful response in the front end, going to have to use the 200 status code
+        return ResponseEntity
+                .ok(new MessageResponse("User found. Their details are not displayed for security reasons."));
     }
-    //updateEmail endpoint scrapped for NOW, as locating user by email requires JWT auth
+
+    @DeleteMapping("/deleteUser")
+    public ResponseEntity<MessageResponse> deleteUser(@Valid @RequestBody NameEmailRequest request) {
+
+        User matchedUser = userService.findByNameAndEmail(request.name(), request.email());
+
+        if (matchedUser == null) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new MessageResponse("No user found with those details."));
+        }
+
+        userService.deleteUser(matchedUser);
+
+        return ResponseEntity
+                .ok(new MessageResponse("User successfully deleted"));
+    }
 }
-
-

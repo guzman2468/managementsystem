@@ -1,34 +1,15 @@
 package com.library.managementsystem.model.user;
 
+import com.library.managementsystem.model.user.UserRole;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.library.managementsystem.model.MessageResponse;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+/**
+ * Outgoing response for user data.
+ * Contains NO password or password hash.
+ */
+public record UserResponse(
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserResponse extends MessageResponse {
-
-    private Integer id;
-    private String name;
-    private String email;
-    private String role;
-
-    //figure out how to clean up the response payload
-    public UserResponse(String message) {
-        super(message);
-    }
-
-    public UserResponse(String email, Integer id, String name, String role) {
-        super(null);
-        this.email = email;
-        this.id = id;
-        this.name = name;
-        this.role = role;
-    }
-}
+        Integer id,
+        String name,
+        String email,
+        UserRole role
+) {}
