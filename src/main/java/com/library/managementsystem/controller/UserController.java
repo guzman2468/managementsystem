@@ -1,16 +1,15 @@
 package com.library.managementsystem.controller;
 
 import com.library.managementsystem.model.MessageResponse;
-import com.library.managementsystem.model.user.CreateUserRequest;
-import com.library.managementsystem.model.user.NameEmailRequest;
-import com.library.managementsystem.model.user.User;
-import com.library.managementsystem.model.user.UserRole;
+import com.library.managementsystem.model.user.*;
 import com.library.managementsystem.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
@@ -53,6 +52,33 @@ public class UserController {
                 .status(HttpStatus.CREATED)
                 .body(response);
     }
+
+    @PostMapping("/userLogin")
+    public ResponseEntity<MessageResponse> userLogin(@Valid @RequestBody UserLoginRequest request) {
+        MessageResponse response = new MessageResponse();
+
+        Optional<User> potentialUser = userService.findByEmail((request.email()));
+
+        // check something was returned from DB query, if not provide purposely ambiguous error message
+        if (potentialUser.isEmpty()) {
+            response.setMessage("Invalid email or password.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+
+        User user = potentialUser.get();
+
+        boolean passwordMatch = passwordEncoder.matches(request.password(), user.getPasswordHash());
+
+        if (!passwordMatch) {
+            response.setMessage("Invalid email or password.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+
+        response.setMessage("Login successful, Welcome " + user.getName() + "!");
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+
 
     // moved to just confirmation opposed to display info
     @PostMapping("/getByNameAndEmail")
